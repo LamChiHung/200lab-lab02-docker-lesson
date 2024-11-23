@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: cg-affiliate-marketing-service
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  affiliate-marketing-be:
+    image: affiliate-marketing-be:0.0.1
+    container_name: affiliate-marketing-be
+    build:
+      context: ./affiliate-marketing
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      DATASOURCE_URL: jdbc:mysql://mysql:3306/cg-affiliate-marketing-service?createDatabaseIfNotExist=true
+      DATASOURCE_USERNAME: root
+      DATASOURCE_PASSWORD: 123456
+      SECRET_KEY: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+    depends_on:
+      - mysql
+
+  affiliate-marketing-fe:
+    image: affiliate-marketing-fe:0.0.1
+    container_name: affiliate-marketing-fe
+    build:
+      context: ./affiliate-marketing-app
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    depends_on:
+      - affiliate-marketing-be
+
+volumes:
+  mysql_data:
